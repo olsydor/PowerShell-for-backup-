@@ -1,42 +1,54 @@
-# Встановлення змінних шляхів
-$sourceDirectory = "W:\чиста"
+# РљРѕРґСѓРІР°РЅРЅСЏ: UTF-8 Р±РµР· BOM
+
+# Setting path variables
+# Р’СЃС‚Р°РЅРѕРІР»РµРЅРЅСЏ Р·РјС–РЅРЅРёС… С€Р»СЏС…С–РІ
+$sourceDirectory = "W:\С‡РёСЃС‚Р°"
 $backupDirectory = "D:\backup_tmp"
 $archiveDirectory = "D:\backup"
 $maxArchiveCount = 5
 
-# Створення директорій, якщо вони не існують
+# Creating directories if they do not exist
+# РЎС‚РІРѕСЂРµРЅРЅСЏ РґРёСЂРµРєС‚РѕСЂС–Р№, СЏРєС‰Рѕ РІРѕРЅРё РЅРµ С–СЃРЅСѓСЋС‚СЊ
 New-Item -ItemType Directory -Force -Path $backupDirectory
 New-Item -ItemType Directory -Force -Path $archiveDirectory
 
-# Отримання поточної дати та часу
+# Getting the current date and time
+# РћС‚СЂРёРјР°РЅРЅСЏ РїРѕС‚РѕС‡РЅРѕС— РґР°С‚Рё С‚Р° С‡Р°СЃСѓ
 $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
 
-# Копіювання каталогу "чиста" до директорії "backup_tmp"
-Write-Host "Копіювання каталогу..."
+# Copying the "С‡РёСЃС‚Р°" directory to "backup_tmp"
+# РљРѕРїС–СЋРІР°РЅРЅСЏ РєР°С‚Р°Р»РѕРіСѓ "С‡РёСЃС‚Р°" РґРѕ РґРёСЂРµРєС‚РѕСЂС–С— "backup_tmp"
+Write-Host "РљРѕРїС–СЋРІР°РЅРЅСЏ РєР°С‚Р°Р»РѕРіСѓ..."
 Copy-Item -Path $sourceDirectory -Destination $backupDirectory -Recurse -Force
 
-# Створення архіву з розширенням .zip
-$archivePath = Join-Path -Path $archiveDirectory -ChildPath ("чиста_$timestamp.zip")
-Write-Host "Стиснення каталогу в архів..."
+
+# Creating a .zip archive
+# РЎС‚РІРѕСЂРµРЅРЅСЏ Р°СЂС…С–РІСѓ Р· СЂРѕР·С€РёСЂРµРЅРЅСЏРј .zip
+$archivePath = Join-Path -Path $archiveDirectory -ChildPath ("С‡РёСЃС‚Р°_$timestamp.zip")
+Write-Host "РЎС‚РёСЃРЅРµРЅРЅСЏ РєР°С‚Р°Р»РѕРіСѓ РІ Р°СЂС…С–РІ..."
 Add-Type -A 'System.IO.Compression.FileSystem'
 [IO.Compression.ZipFile]::CreateFromDirectory($backupDirectory, $archivePath)
 
-# Видалення каталогу "чиста" з директорії "backup_tmp"
-Write-Host "Видалення каталогу..."
+# Deleting the "С‡РёСЃС‚Р°" directory from "backup_tmp"
+# Р’РёРґР°Р»РµРЅРЅСЏ РєР°С‚Р°Р»РѕРіСѓ "С‡РёСЃС‚Р°" Р· РґРёСЂРµРєС‚РѕСЂС–С— "backup_tmp"
+Write-Host "Р’РёРґР°Р»РµРЅРЅСЏ РєР°С‚Р°Р»РѕРіСѓ..."
 Remove-Item -Path $backupDirectory -Recurse -Force
 
-# Переміщення архіву до директорії "backup" і збереження лише останніх 5 версій
-Write-Host "Збереження архіву..."
+# Moving the archive to the "backup" directory and keeping only the last 5 versions
+# РџРµСЂРµРјС–С‰РµРЅРЅСЏ Р°СЂС…С–РІСѓ РґРѕ РґРёСЂРµРєС‚РѕСЂС–С— "backup" С– Р·Р±РµСЂРµР¶РµРЅРЅСЏ Р»РёС€Рµ РѕСЃС‚Р°РЅРЅС–С… 5 РІРµСЂСЃС–Р№
+Write-Host "Р—Р±РµСЂРµР¶РµРЅРЅСЏ Р°СЂС…С–РІСѓ..."
 Move-Item -Path $archivePath -Destination $archiveDirectory
 
-# Видалення зайвих архівів, якщо їх більше, ніж $maxArchiveCount
+# Deleting excess archives if there are more than $maxArchiveCount
+# Р’РёРґР°Р»РµРЅРЅСЏ Р·Р°Р№РІРёС… Р°СЂС…С–РІС–РІ, СЏРєС‰Рѕ С—С… Р±С–Р»СЊС€Рµ, РЅС–Р¶ $maxArchiveCount
 $archives = Get-ChildItem -Path $archiveDirectory -Filter "*.zip" | Sort-Object -Property LastWriteTime -Descending
 if ($archives.Count -gt $maxArchiveCount) {
     $archivesToDelete = $archives | Select-Object -Skip $maxArchiveCount
-    Write-Host "Видалення зайвих архівів..."
+    Write-Host "Р’РёРґР°Р»РµРЅРЅСЏ Р·Р°Р№РІРёС… Р°СЂС…С–РІС–РІ..."
     foreach ($archiveToDelete in $archivesToDelete) {
         Remove-Item -Path $archiveToDelete.FullName -Force
     }
 }
 
-Write-Host "Операції завершено."
+Write-Host "РћРїРµСЂР°С†С–С— Р·Р°РІРµСЂС€РµРЅРѕ."
+# Write-Host "Operations completed."
